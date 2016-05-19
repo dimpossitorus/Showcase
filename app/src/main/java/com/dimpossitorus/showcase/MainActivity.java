@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     private String CONN_TAG = "NETWORK";
     private String DEBUG_TAG = "DEBUG";
 
+    // Intent Tag
+    private static int BARCODE_CODE = 1;
+
     // Network Management
     private ConnectivityManager connectivityManager;
     private NetworkInfo networkInfo;
@@ -58,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Start the camera intent to scan barcode
+                Intent barcodeScanIntent = new Intent(MainActivity.this, BarcodeScannerActivity.class);
+                startActivityForResult(barcodeScanIntent, BARCODE_CODE);
             }
         });
 
@@ -72,14 +77,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Put Product Code on resultIntent
-                if (inputCode.getText()!=null) {
+                if (inputCode.getText()!=null && productCode=="") {
                     productCode = inputCode.getText().toString();
                 }
                 Log.d(DEBUG_TAG, "Product code is "+productCode);
+                new requestData().execute(productCode);
             }
 
 
         });
+    }
+
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        if (requestCode == BARCODE_CODE) {
+            productCode = data.getStringExtra("productCode");
+        }
     }
 
     @Override
@@ -122,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(CONN_TAG, String.valueOf(response));
                 inputStream = connection.getInputStream();
                 result = IOUtils.toString(inputStream,"UTF-8");
+                Log.d(DEBUG_TAG, "Result is :"+result);
             } catch (MalformedURLException e) {
                 Log.d(DEBUG_TAG, "Error creating URL");
                 e.printStackTrace();
@@ -138,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
             try {
                 _response = new JSONObject(result);
                 respond = new Response(_response);
+                Log.d(DEBUG_TAG, "Respond is created : "+_response.toString());
+                Log.d(DEBUG_TAG, "Respond status : "+respond.getStatus());
+                Log.d(DEBUG_TAG, "Respond message :"+respond.getMessage());
             } catch (JSONException e) {
                 Log.d(DEBUG_TAG, "Error Creating respond");
                 e.printStackTrace();
@@ -149,10 +166,13 @@ public class MainActivity extends AppCompatActivity {
                 showProduct.putExtra("desc", respond.getDescription());
                 showProduct.putExtra("qty", respond.getQty());
                 showProduct.putExtra("imgUrl", respond.getImgUrl());
+                Log.d(DEBUG_TAG, "Starting Intent");
                 startActivity(showProduct);
             }
             else {
-                Toast.makeText(getApplicationContext(), "Connection Failed.", Toast.LENGTH_LONG).show();
+                if (respond!=null) {
+                    Toast.makeText(getApplicationContext(), "Connection Failed. Message : "+respond.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
