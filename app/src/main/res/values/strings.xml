@@ -3,4 +3,8 @@
     <string name="scan">Scan Code</string>
     <string name="submit">Find Product</string>
     <string name="formHint">Type Product Code</string>
+    <string name="productName">Product Title</string>
+    <string name="quantity">Qty</string>
+    <string name="description">Description</string>
+    <string name="backButton">Back</string>
 </resources>
