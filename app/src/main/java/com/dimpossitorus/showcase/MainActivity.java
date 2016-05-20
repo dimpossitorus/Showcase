@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         if (requestCode == BARCODE_CODE) {
             productCode = data.getStringExtra("productCode");
+            new requestData().execute(productCode);
         }
     }
 
